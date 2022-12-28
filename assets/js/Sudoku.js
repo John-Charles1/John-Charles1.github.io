@@ -3,27 +3,30 @@ let numSelected = null;
 let tileSelected = null;
 
 let errors = 0;
-
-var board = [
-    // "--74916-5",
-    // "2---6-3-9",
-    // "-----7-1-",
-    // "-586----4",
-    // "--3----9-",
-    // "--62--187",
-    // "9-4-7---2",
-    // "67-83----",
-    // "81--45---",
-    [0,0,7,4,9,1,6,0,5],
-    [2,0,0,0,6,0,3,0,9],
-    [0,0,0,0,0,7,0,1,0],
-    [0,5,8,6,0,0,0,0,4],
-    [0,0,3,0,0,0,0,9,0],
-    [0,0,6,2,0,0,1,8,7],
-    [9,0,4,0,7,0,0,0,2],
-    [6,7,0,8,3,0,0,0,0],
-    [8,1,0,0,4,5,0,0,0,],
+var resetBoard = [
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],  
 ]
+
+var resetSolution = [
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+]
+var board = generateSudoku(50);
 
 var solution = [
     "387491625",
@@ -74,10 +77,56 @@ function setGame(){
     let solveButton = document.createElement("button");
     solveButton.type = "button";
     solveButton.innerText = "Solve!";
+    solveButton.classList.add("button-4");
     solveButton.addEventListener("click", solve);
     document.getElementById("button").append(solveButton);
+
+    let resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.innerText = "New";
+    resetButton.classList.add("button-4");
+    resetButton.addEventListener("click", reset);
+    document.getElementById("button").append(resetButton );
 }
 
+function reset(){
+  board = generateSudoku(50);
+  for(let r = 0; r < 9; r++){
+    for(let c = 0; c < 9; c++){
+        var tile = document.getElementById(r.toString()+"-"+c.toString());
+        
+        tile.innerText = ' ';
+        tile.classList.remove("tile-selected");
+
+        if(r == 2 || r == 5)
+            tile.classList.add("horizontal-line");
+        if(c == 2 || c == 5)
+            tile.classList.add("vertical-line");
+        tile.addEventListener("click", selectTile);
+        tile.classList.add("tile");
+        document.getElementById("board").append(tile);
+    }
+  }
+
+  for(let r = 0; r < 9; r++){
+    for(let c = 0; c < 9; c++){
+        var tile = document.getElementById(r.toString()+"-"+c.toString());
+        
+        if(board[r][c] != 0){
+            tile.innerText = board[r][c];
+            tile.classList.add("tile-selected");
+        }
+
+        if(r == 2 || r == 5)
+            tile.classList.add("horizontal-line");
+        if(c == 2 || c == 5)
+            tile.classList.add("vertical-line");
+        tile.addEventListener("click", selectTile);
+        tile.classList.add("tile");
+        document.getElementById("board").append(tile);
+    }
+  }
+}
 function solve(){
     if(solveSudoku(board)){
         for(let r = 0; r < 9; r++){
@@ -86,7 +135,7 @@ function solve(){
             }
         }
     }else{
-        alert("no solution dipshit");
+        alert("no solution");
     }
 }
 function selectNumber(){
@@ -97,27 +146,29 @@ function selectNumber(){
     numSelected.classList.add("number-selected");
 }
 
-function selectTile(){
-    if(numSelected){
-        if(this.innerText != "")
-            return
-        this.innerText = numSelected.id;
+function selectTile() {
+  if (numSelected) {
+      if (this.innerText != "") {
+          return;
+      }
 
-        let coords = this.id.split("-");
-        let r = parseInt(coords[0]);
-        let c = parseInt(coords[1]);
+      // "0-0" "0-1" .. "3-1"
+      let coords = this.id.split("-"); //["0", "0"]
+      let r = parseInt(coords[0]);
+      let c = parseInt(coords[1]);
 
-        if(solution[r][c] == numSelected.id){
-            this.innerText = numSelected.id;
-        }else{
-            errors++;
-            document.getElementById("errors").innerText = errors;
-        }
-    }
+      if (solution[r][c] == numSelected.id) {
+          this.innerText = numSelected.id;
+      }
+      else {
+          errors += 1;
+          document.getElementById("errors").innerText = errors;
+      }
+  }
 }
 
 
-function solveSudoku(grid) {
+  function solveSudoku(grid) {
     // This function will return the first empty cell it finds in the grid, or null if the grid is full
     function findEmptyCell() {
       for (let row = 0; row < 9; row++) {
@@ -185,3 +236,110 @@ function solveSudoku(grid) {
     return solve();
   }
   
+  function generateSudoku(numCellsToRemove = 50) {
+    // Initialize the Sudoku board
+    let board = [    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+  
+    // Fill the diagonal of 3x3 squares
+    for (let i = 0; i < 9; i += 3) {
+      fillSquare(board, i, i);
+    }
+  
+    // Fill the rest of the board
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        if (board[i][j] === 0) {
+          fillCell(board, i, j);
+        }
+      }
+    }
+  
+    // Remove a certain number of cells from the board
+    let cellsRemoved = 0;
+    while (cellsRemoved < numCellsToRemove) {
+      let row = Math.floor(Math.random() * 9);
+      let col = Math.floor(Math.random() * 9);
+      if (board[row][col] !== 0) {
+        board[row][col] = 0;
+        cellsRemoved++;
+      }
+    }
+  
+    // Return the generated board
+    return board;
+  }
+  
+  // Helper function to fill a 3x3 square
+function fillSquare(board, row, col) {
+  let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  for (let i = row; i < row + 3; i++) {
+    for (let j = col; j < col + 3; j++) {
+      let randIndex = Math.floor(Math.random() * nums.length);
+      let randNum = nums[randIndex];
+      if (!checkRow(board, i, randNum) && !checkCol(board, j, randNum) && !checkSquare(board, i, j, randNum)) {
+        board[i][j] = randNum;
+      } else {
+        j--;
+      }
+      nums.splice(randIndex, 1);
+    }
+  }
+}
+
+// Helper function to fill a cell
+function fillCell(board, row, col) {
+  let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  while (nums.length > 0) {
+    let randIndex = Math.floor(Math.random() * nums.length);
+    let randNum = nums[randIndex];
+    if (!checkRow(board, row, randNum) && !checkCol(board, col, randNum) && !checkSquare(board, row, col, randNum)) {
+      board[row][col] = randNum;
+      return;
+    } else {
+      nums.splice(randIndex, 1);
+    }
+  }
+}
+
+// Helper function to check if a number is in a row
+function checkRow(board, row, num) {
+    for (let col = 0; col < 9; col++) {
+      if (board[row][col] === num) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  // Helper function to check if a number is in a column
+  function checkCol(board, col, num) {
+    for (let row = 0; row < 9; row++) {
+      if (board[row][col] === num) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  // Helper function to check if a number is in a 3x3 square
+  function checkSquare(board, row, col, num) {
+    let startRow = row - (row % 3);
+    let startCol = col - (col % 3);
+    for (let i = startRow; i < startRow + 3; i++) {
+      for (let j = startCol; j < startCol + 3; j++) {
+        if (board[i][j] === num) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
