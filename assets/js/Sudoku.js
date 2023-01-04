@@ -129,11 +129,18 @@ function reset(){
 }
 function solve(){
     if(solveSudoku(board)){
-        for(let r = 0; r < 9; r++){
-            for(let c = 0; c < 9; c++){
-                document.getElementById(r.toString()+"-"+c.toString()).innerText = board[r][c];
-            }
-        }
+        let row = 0;
+        let collumn = 0;
+        setInterval(() => {
+          document.getElementById(row.toString()+"-"+collumn.toString()).innerText = board[row][collumn];
+          collumn++;
+          if(collumn == 9){
+            if(row == 8)
+              return;
+            row++;
+            collumn = 0;
+          }
+        }, 100);
     }else{
         alert("no solution");
     }
